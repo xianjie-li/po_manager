@@ -1,0 +1,105 @@
+GET http://localhost:3000
+
+###
+GET http://localhost:3000/test_err
+
+###
+GET http://localhost:3000/test_err2
+
+###
+GET http://localhost:3000/test_res1/213.123
+
+###
+POST http://localhost:3000/project/create
+Content-Type: application/json
+
+{
+  "name": "test3",
+  "code": "test-13232132",
+  "release_date": "2024-12-12",
+  "plan_delivery_date": "2024-12-13",
+  "tech_days": 512,
+  "test_days": 2210,
+  "price": 2151342.25,
+  "pm": "李23x"
+}
+
+###
+GET http://localhost:3000/project/list?pm=李xx11
+
+###
+GET http://localhost:3000/project/get/58d8e756-342e-42e4-b40c-3a40eaa2433f
+
+###
+POST http://localhost:3000/project/delete/ef76d270-eb77-44e0-b72e-5436a68b5587
+Content-Type: application/json
+
+###
+POST http://localhost:3000/project/update/9cbfb4f3-7e97-4748-a437-33936d252026
+Content-Type: application/json
+
+{
+  "name": "test2424",
+  "code": "test-12321311",
+  "release_date": "2024-12-15",
+  "plan_delivery_date": "2024-12-15",
+  "tech_days": 11,
+  "test_days": 11,
+  "price": 21515442.11,
+  "pm": "李xx11"
+}
+
+###
+POST http://localhost:3000/employee/create
+Content-Type: application/json
+
+{
+  "name": "员工3",
+  "status": "Leave"
+}
+
+###
+GET http://localhost:3000/employee/list?name=3
+
+###
+GET http://localhost:3000/employee/get/cc83620e-9ad0-460e-ba4c-694456c7713c
+
+###
+POST http://localhost:3000/employee/delete/28260f75-4ad7-4adb-98b1-71b7b09d3841
+Content-Type: application/json
+
+###
+POST http://localhost:3000/employee/update/cc83620e-9ad0-460e-ba4c-694456c7713c
+Content-Type: application/json
+
+{
+  "name": "tes"
+}
+
+###
+POST http://localhost:3000/employee_change/create
+Content-Type: application/json
+
+{
+  "employee_id": "cc83620e-9ad0-460e-ba4c-694456c7713c",
+  "project_id": "51f3f08f-914d-4832-a909-affc46bcf5ad",
+  "in_time": "2024-12-12"
+}
+
+###
+GET http://localhost:3000/employee_change/list?out_time=2024-12-15
+
+###
+GET http://localhost:3000/employee_change/get/20b85622-a116-40b7-9952-713dd2e3cec5
+
+###
+POST http://localhost:3000/employee_change/delete/28260f75-4ad7-4adb-98b1-71b7b09d3841
+Content-Type: application/json
+
+###
+POST http://localhost:3000/employee_change/update/20b85622-a116-40b7-9952-713dd2e3cec5
+Content-Type: application/json
+
+{
+  "out_time": "2024-12-19"
+}
