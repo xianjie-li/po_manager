@@ -1,15 +1,16 @@
 /// NaiveDateTime serde 支持
+#[allow(dead_code)]
 pub mod datetime_format {
     use chrono::NaiveDateTime;
     use serde::{self, Deserialize, Deserializer, Serializer};
 
-    const FORMAT: &'static str = "%Y-%m-%d %H:%M:%S";
+    pub const DATETIME_FORMAT: &'static str = "%Y-%m-%d %H:%M:%S";
 
     pub fn serialize<S>(date: &NaiveDateTime, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let s = format!("{}", date.format(FORMAT));
+        let s = format!("{}", date.format(DATETIME_FORMAT));
         serializer.serialize_str(&s)
     }
 
@@ -18,7 +19,8 @@ pub mod datetime_format {
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        let dt = NaiveDateTime::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
+        let dt =
+            NaiveDateTime::parse_from_str(&s, DATETIME_FORMAT).map_err(serde::de::Error::custom)?;
         Ok(dt)
     }
 }
@@ -28,13 +30,13 @@ pub mod date_format {
     use chrono::NaiveDate;
     use serde::{self, Deserialize, Deserializer, Serializer};
 
-    const FORMAT: &'static str = "%Y-%m-%d";
+    pub const DATE_FORMAT: &'static str = "%Y-%m-%d";
 
     pub fn serialize<S>(date: &NaiveDate, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        let s = format!("{}", date.format(FORMAT));
+        let s = format!("{}", date.format(DATE_FORMAT));
         serializer.serialize_str(&s)
     }
 
@@ -43,7 +45,7 @@ pub mod date_format {
         D: Deserializer<'de>,
     {
         let s = String::deserialize(deserializer)?;
-        let dt = NaiveDate::parse_from_str(&s, FORMAT).map_err(serde::de::Error::custom)?;
+        let dt = NaiveDate::parse_from_str(&s, DATE_FORMAT).map_err(serde::de::Error::custom)?;
         Ok(dt)
     }
 }

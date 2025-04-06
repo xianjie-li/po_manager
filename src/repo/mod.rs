@@ -3,7 +3,8 @@ use std::path::Path;
 use db::DB;
 
 use crate::entity::{
-    employee::EntityEmployee, employee_change::EntityEmployeeChange, project::EntityProject,
+    attendance::EntityAttendance, employee::EntityEmployee, employee_change::EntityEmployeeChange,
+    project::EntityProject, special_date::EntitySpecialDate,
 };
 
 pub mod db;
@@ -29,5 +30,21 @@ impl DB for EntityEmployeeChange {
 
     fn get_path() -> impl AsRef<Path> {
         "/Users/lixianjie/project/proj/po_manager/db/employee_change.json"
+    }
+}
+
+impl DB for EntityAttendance {
+    type Entity = EntityAttendance;
+
+    fn get_path() -> impl AsRef<Path> {
+        "/Users/lixianjie/project/proj/po_manager/db/attendance.json"
+    }
+}
+
+impl DB for EntitySpecialDate {
+    type Entity = EntitySpecialDate;
+
+    fn get_path() -> impl AsRef<Path> {
+        "/Users/lixianjie/project/proj/po_manager/db/special_date.json"
     }
 }

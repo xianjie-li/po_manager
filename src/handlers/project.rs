@@ -5,9 +5,10 @@ use axum::{
 use uuid::Uuid;
 
 use crate::{
-    entity::project::{DTOProjectCreate, DTOProjectParam, EntityProject},
+    entity::project::{DTOProjectCreate, DTOProjectParam, DTOProjectUpdate, EntityProject},
     repo::db::{DB, DBType},
     result::response::{AppResponse, AppResult},
+    serde_custom::date_format::{date_format::DATE_FORMAT, datetime_format::DATETIME_FORMAT},
 };
 
 pub async fn create(
@@ -52,38 +53,28 @@ pub async fn list(
                 }
             }
 
-            if let Some(cur) = &project.name {
-                if !p.name.contains(cur) {
+            if let Some(cur) = &project.name_or_code {
+                if !p.name.contains(cur) && !p.code.contains(cur) {
                     pass = false;
                 }
             }
 
-            if let Some(cur) = &project.code {
-                if !p.code.contains(cur) {
+            if let Some(cur) = &project.pm {
+                if !p.pm.contains(cur) {
                     pass = false;
                 }
             }
 
-            if let Some(cur) = &project.release_date {
-                if p.release_date != *cur {
+            if let Some(cur) = &project.release_date_fuzzy {
+                let d_str = p.release_date.format(DATE_FORMAT).to_string();
+                if !d_str.contains(cur) {
                     pass = false;
                 }
             }
 
-            if let Some(cur) = &project.plan_delivery_date {
-                if p.plan_delivery_date != *cur {
-                    pass = false;
-                }
-            }
-
-            if let Some(cur) = &project.tech_days {
-                if p.tech_days != *cur {
-                    pass = false;
-                }
-            }
-
-            if let Some(cur) = &project.test_days {
-                if p.test_days != *cur {
+            if let Some(cur) = &project.plan_delivery_date_fuzzy {
+                let d_str = p.plan_delivery_date.format(DATE_FORMAT).to_string();
+                if !d_str.contains(cur) {
                     pass = false;
                 }
             }
@@ -94,8 +85,9 @@ pub async fn list(
                 }
             }
 
-            if let Some(cur) = &project.pm {
-                if p.pm != *cur {
+            if let Some(cur) = &project.days {
+                let days = p.tech_days + p.test_days;
+                if days != *cur {
                     pass = false;
                 }
             }
@@ -140,7 +132,7 @@ pub async fn delete(
 pub async fn update(
     Extension(db): Extension<DBType<EntityProject>>,
     Path(id): Path<String>,
-    Json(project): Json<DTOProjectParam>,
+    Json(project): Json<DTOProjectUpdate>,
 ) -> AppResult {
     let mut project_db = db.lock().unwrap();
 

@@ -49,11 +49,43 @@ pub struct DTOProjectCreate {
     pub pm: String,
 }
 
-/// 项目信息
+/// 项目信息查询等参数
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DTOProjectParam {
     #[serde(default)]
     pub id: Option<String>,
+    /// 名称
+    #[serde(default)]
+    pub name_or_code: Option<String>,
+    /// 项目经理
+    #[serde(default)]
+    pub pm: Option<String>,
+    /// 项目成员
+    #[serde(default)]
+    pub employee: Option<String>,
+    /// 项目成员
+    #[serde(default)]
+    pub low_days: Option<i32>,
+    /// 项目成员
+    #[serde(default)]
+    pub low_percent: Option<f32>,
+    /// 项目成员
+    #[serde(default)]
+    pub release_date_fuzzy: Option<String>,
+    /// 项目成员
+    #[serde(default)]
+    pub plan_delivery_date_fuzzy: Option<String>,
+    /// 报价
+    #[serde(default)]
+    pub price: Option<f64>,
+    /// 总人天
+    #[serde(default)]
+    pub days: Option<i32>,
+}
+
+/// 项目信息更新
+#[derive(Serialize, Deserialize, Debug)]
+pub struct DTOProjectUpdate {
     /// 名称
     #[serde(default)]
     pub name: Option<String>,

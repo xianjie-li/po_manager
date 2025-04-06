@@ -5,7 +5,10 @@ use axum::{
 use uuid::Uuid;
 
 use crate::{
-    entity::employee::{DTOEmployeeCreate, DTOEmployeeParam, EmployeeStatus, EntityEmployee},
+    entity::employee::{
+        DTOEmployee, DTOEmployeeCreate, DTOEmployeeParam, EmployeeStatus, EntityEmployee,
+        get_employee_status_meaning,
+    },
     repo::db::{DB, DBType},
     result::response::{AppResponse, AppResult},
 };
@@ -20,6 +23,7 @@ pub async fn create(
         id: Uuid::new_v4().to_string(),
         name: employee.name,
         status: employee.status.unwrap_or(EmployeeStatus::Working),
+        position: employee.position,
     };
 
     employee_db.insert(0, new_employee);
@@ -35,7 +39,7 @@ pub async fn list(
 ) -> AppResult {
     let employee_db = db.lock().unwrap();
 
-    let res: Vec<&EntityEmployee> = employee_db
+    let res: Vec<DTOEmployee> = employee_db
         .iter()
         .filter(|p| {
             let mut pass = true;
@@ -59,6 +63,13 @@ pub async fn list(
             }
 
             pass
+        })
+        .map(|p| DTOEmployee {
+            id: p.id.clone(),
+            name: p.name.clone(),
+            status: p.status.clone(),
+            status_meaning: get_employee_status_meaning(&p.status),
+            position: p.position.clone(),
         })
         .collect();
 

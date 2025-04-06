@@ -1,23 +1,16 @@
-use anyhow::anyhow;
 use axum::{
     Extension, Router,
-    extract::Path,
     middleware::from_fn,
     routing::{get, post},
 };
-use chrono::Utc;
 use entity::{
-    EntitySpecialDate, SpecialDateType, employee::EntityEmployee,
-    employee_change::EntityEmployeeChange, project::EntityProject,
+    attendance::EntityAttendance, employee::EntityEmployee, employee_change::EntityEmployeeChange,
+    project::EntityProject, special_date::EntitySpecialDate,
 };
-use handlers::{employee, employee_change, project};
+use handlers::{attendance, employee, employee_change, project, special_date};
 use repo::db::DB;
-use result::{
-    response::{AppResponse, AppResult, text_response_process},
-    response_code::AppResponseCode,
-};
+use result::response::text_response_process;
 use tower::ServiceBuilder;
-use uuid::Uuid;
 
 mod entity;
 
@@ -31,9 +24,8 @@ async fn main() {
     let project = EntityProject::new();
     let employee = EntityEmployee::new();
     let employee_change = EntityEmployeeChange::new();
-
-    println!("project:: {:?}", project);
-    println!("employee:: {:?}", employee);
+    let attendance = EntityAttendance::new();
+    let special_date = EntitySpecialDate::new();
 
     // build our application with a single route
     let app = Router::new()
@@ -59,54 +51,26 @@ async fn main() {
             "/employee_change/update/{id}",
             post(employee_change::update),
         )
+        .route("/attendance/create", post(attendance::create))
+        .route("/attendance/list", get(attendance::list))
+        .route("/attendance/get/{id}", get(attendance::get))
+        .route("/attendance/delete/{id}", post(attendance::delete))
+        .route("/attendance/update/{id}", post(attendance::update))
+        .route("/special_date/create", post(special_date::create))
+        .route("/special_date/list", get(special_date::list))
+        .route("/special_date/get/{id}", get(special_date::get))
+        .route("/special_date/delete/{id}", post(special_date::delete))
+        .route("/special_date/update/{id}", post(special_date::update))
         .layer(
             ServiceBuilder::new()
                 .layer(from_fn(text_response_process))
                 .layer(Extension(project))
                 .layer(Extension(employee))
-                .layer(Extension(employee_change)),
+                .layer(Extension(employee_change))
+                .layer(Extension(attendance))
+                .layer(Extension(special_date)),
         );
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
-}
-
-async fn test_err() -> AppResult {
-    try_thing()?;
-    Err(anyhow!("it failed213123!").into())
-}
-
-async fn test_err2() -> AppResult {
-    let data = EntitySpecialDate {
-        id: Uuid::new_v4().to_string(),
-        date: Utc::now().date_naive(),
-        date_type: SpecialDateType::Include,
-    };
-
-    print!("{:#?} 12321", data);
-
-    println!("{}", data.date);
-
-    println!("{}", serde_json::to_string_pretty(&data)?);
-
-    AppResponse::ok(data)
-}
-
-async fn test_res1(Path(id): Path<i32>) -> AppResult {
-    // try_thing()?;
-
-    // AppResponse::<()>::err("dwqdwqdwq")
-    // AppResponse::ok("dwqdwqdwq")
-
-    let res = AppResponse::new()
-        .code(AppResponseCode::Unauthorized)
-        .msg("hehe")
-        .data("test data 1321")
-        .build();
-
-    res
-}
-
-fn try_thing() -> Result<(), anyhow::Error> {
-    anyhow::bail!("it failed!")
 }

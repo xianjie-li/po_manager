@@ -2,6 +2,7 @@ use anyhow::Result;
 use axum::{
     Json,
     extract::Request,
+    http::HeaderValue,
     middleware::Next,
     response::{IntoResponse, Response},
 };
@@ -71,11 +72,13 @@ impl<T: Serialize> AppResponse<T> {
         self
     }
 
+    #[allow(dead_code)]
     pub fn data(mut self, data: T) -> Self {
         self.data = Some(data);
         self
     }
 
+    #[allow(dead_code)]
     pub fn build(self) -> AppResult {
         Ok(self.into_response())
     }
@@ -93,7 +96,7 @@ pub async fn text_response_process(request: Request, next: Next) -> Response {
         let is_ok: bool =
             !response.status().is_server_error() && !response.status().is_client_error();
 
-        let (parts, body) = response.into_parts();
+        let (mut parts, body) = response.into_parts();
 
         let bytes = match body.collect().await {
             Ok(collected) => collected.to_bytes(),
@@ -110,6 +113,11 @@ pub async fn text_response_process(request: Request, next: Next) -> Response {
         } else {
             AppResponseCode::Err
         };
+
+        parts.headers.insert(
+            "Content-Type",
+            HeaderValue::from_str("application/json").unwrap(),
+        );
 
         Response::from_parts(
             parts,

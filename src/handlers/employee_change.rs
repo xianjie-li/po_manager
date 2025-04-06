@@ -1,3 +1,5 @@
+use std::{collections::HashMap, ops::Deref};
+
 use axum::{
     Extension, Json,
     extract::{Path, Query},
@@ -5,13 +7,17 @@ use axum::{
 use uuid::Uuid;
 
 use crate::{
-    entity::employee_change::{
-        DTOEmployeeChangeCreate, DTOEmployeeChangeParam, EntityEmployeeChange,
+    entity::{
+        employee::EntityEmployee,
+        employee_change::{
+            DTOEmployeeChange, DTOEmployeeChangeCreate, DTOEmployeeChangeParam,
+            EntityEmployeeChange,
+        },
+        project::EntityProject,
     },
     repo::db::{DB, DBType},
     result::response::{AppResponse, AppResult},
 };
-
 pub async fn create(
     Extension(db): Extension<DBType<EntityEmployeeChange>>,
     Json(employee): Json<DTOEmployeeChangeCreate>,
@@ -34,12 +40,26 @@ pub async fn create(
 }
 
 pub async fn list(
-    Extension(db): Extension<DBType<EntityEmployeeChange>>,
+    Extension(employee_change_db): Extension<DBType<EntityEmployeeChange>>,
+    Extension(employee_db): Extension<DBType<EntityEmployee>>,
+    Extension(project_db): Extension<DBType<EntityProject>>,
     Query(employee): Query<DTOEmployeeChangeParam>,
 ) -> AppResult {
-    let employee_db = db.lock().unwrap();
+    let employee_change_db = employee_change_db.lock().unwrap();
+    let employee_db = employee_db.lock().unwrap();
+    let project_db = project_db.lock().unwrap();
 
-    let res: Vec<&EntityEmployeeChange> = employee_db
+    let employee_name_map = employee_db
+        .iter()
+        .map(|p| (p.id.clone(), p.name.clone()))
+        .collect::<HashMap<String, String>>();
+
+    let project_name_map = project_db
+        .iter()
+        .map(|p| (p.id.clone(), p.name.clone()))
+        .collect::<HashMap<String, String>>();
+
+    let res: Vec<DTOEmployeeChange> = employee_change_db
         .iter()
         .filter(|p| {
             let mut pass = true;
@@ -75,6 +95,21 @@ pub async fn list(
             }
 
             pass
+        })
+        .map(|p| DTOEmployeeChange {
+            id: p.id.clone(),
+            employee_id: p.employee_id.clone(),
+            employee_name: employee_name_map
+                .get(&p.employee_id)
+                .unwrap_or(&String::from(""))
+                .clone(),
+            project_id: p.project_id.clone(),
+            project_name: project_name_map
+                .get(&p.project_id)
+                .unwrap_or(&String::from(""))
+                .clone(),
+            in_time: p.in_time,
+            out_time: p.out_time,
         })
         .collect();
 
@@ -114,35 +149,21 @@ pub async fn delete(
 pub async fn update(
     Extension(db): Extension<DBType<EntityEmployeeChange>>,
     Path(id): Path<String>,
-    Json(employee): Json<DTOEmployeeChangeParam>,
+    Json(employee): Json<EntityEmployeeChange>,
 ) -> AppResult {
     let mut employee_db = db.lock().unwrap();
 
-    let cur = employee_db.iter_mut().find(|p| p.id == id);
+    let ind = employee_db.iter().position(|p| p.id == id);
 
-    if cur.is_none() {
+    if ind.is_none() {
         return AppResponse::<()>::err("记录不存在");
     }
 
-    let cur: &mut EntityEmployeeChange = cur.unwrap();
+    let ind = ind.unwrap();
 
-    if let Some(val) = employee.employee_id {
-        cur.employee_id = val;
-    }
+    let res = AppResponse::ok(&employee);
 
-    if let Some(val) = employee.project_id {
-        cur.project_id = val;
-    }
-
-    if let Some(val) = employee.in_time {
-        cur.in_time = val;
-    }
-
-    if let Some(val) = employee.out_time {
-        cur.out_time = Some(val);
-    }
-
-    let res = AppResponse::ok(cur);
+    employee_db[ind] = employee;
 
     EntityEmployeeChange::store(&employee_db)?;
 

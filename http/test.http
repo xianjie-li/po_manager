@@ -25,10 +25,10 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:3000/project/list?pm=李xx11
+GET http://localhost:3000/project/list?pm=李23x
 
 ###
-GET http://localhost:3000/project/get/58d8e756-342e-42e4-b40c-3a40eaa2433f
+GET http://localhost:3000/project/get/f3f0b49e-45da-43e4-8a29-aad75848f2ce
 
 ###
 POST http://localhost:3000/project/delete/ef76d270-eb77-44e0-b72e-5436a68b5587
@@ -54,12 +54,13 @@ POST http://localhost:3000/employee/create
 Content-Type: application/json
 
 {
-  "name": "员工3",
-  "status": "Leave"
+  "name": "员工10",
+  "status": "Working",
+  "position": "测试"
 }
 
 ###
-GET http://localhost:3000/employee/list?name=3
+GET http://localhost:3000/employee/list
 
 ###
 GET http://localhost:3000/employee/get/cc83620e-9ad0-460e-ba4c-694456c7713c
@@ -81,13 +82,13 @@ POST http://localhost:3000/employee_change/create
 Content-Type: application/json
 
 {
-  "employee_id": "cc83620e-9ad0-460e-ba4c-694456c7713c",
-  "project_id": "51f3f08f-914d-4832-a909-affc46bcf5ad",
+  "employee_id": "e1c93c6d-8e45-40f4-bee0-e89c40e71258",
+  "project_id": "19577267-ca0a-4c1e-a04f-9b21acb253df",
   "in_time": "2024-12-12"
 }
 
 ###
-GET http://localhost:3000/employee_change/list?out_time=2024-12-15
+GET http://localhost:3000/employee_change/list
 
 ###
 GET http://localhost:3000/employee_change/get/20b85622-a116-40b7-9952-713dd2e3cec5
